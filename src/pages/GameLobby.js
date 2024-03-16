@@ -67,7 +67,7 @@ const GameLobby = (props) => {
         />
         <input
           type="button"
-          value="START GAME"
+          value="START GAME" 
           id="button"
           className="bg-white rounded-lg w-full py-2 border-b-8 cursor-pointer border-black "
           onClick={() => startGame()}

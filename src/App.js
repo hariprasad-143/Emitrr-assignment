@@ -24,7 +24,7 @@ const App = () => {
          history('/playGame')
        }
  
-      }, [])
+      }, [history,user])
       
       const setIsLobby =(value)=>{
           setisLobby(value)

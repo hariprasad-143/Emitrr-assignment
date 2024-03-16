@@ -39,7 +39,7 @@ function Leaderboard() {
     socket.on("sendUsers", () => {
       dispatch(fetchUsers());
     });
-  }, [users]);
+  }, [users,dispatch]);
 
   return (
     <div>

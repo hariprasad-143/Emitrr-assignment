@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import bgImage from "../assets/img/bg.jpg";
 import cardImage from "../assets/img/card.png";
@@ -25,7 +25,49 @@ const GamePlayArea = (props) => {
   const [openedCard, setOpenedCard] = useState("");
 
   // game cards
-  const cards = ["CAT", "DEFUSE", "SHUFFLE", "EXPLODE"];
+  const cards = useMemo(()=>["CAT", "DEFUSE", "SHUFFLE", "EXPLODE"],[]);
+
+  const generateRandomDeck = useCallback(() => {
+    //to generate 5 random numbers from 0 to 3
+    const c1 = Math.floor(Math.random() * 4);
+    const c2 = Math.floor(Math.random() * 4);
+    const c3 = Math.floor(Math.random() * 4);
+    const c4 = Math.floor(Math.random() * 4);
+    const c5 = Math.floor(Math.random() * 4);
+
+    //making random array by putting random numbers //
+    let randromDeck = [cards[c1], cards[c2], cards[c3], cards[c4], cards[c5]];
+
+    // filtering shuffle cards if it is more than 1
+    let shuffleCount = 0;
+    randromDeck = randromDeck.map((card) => {
+      if (card === "SHUFFLE") {
+        shuffleCount++;
+        if (shuffleCount > 1) {
+          card = "CAT";
+        }
+      }
+      return card;
+    });
+    return randromDeck;
+  },[cards]);
+
+  const updateGameState = useCallback(() => {
+    //to update game state on every user action //
+    if (user?.deck?.length < 5 && user?.deck?.length > 0) {
+      setDeck(user?.deck);
+      setDefuseCards(user.defuseCards);
+      setOpenedCard(user?.openedCard);
+    } else if (user?.deck.length === 5) {
+      setDeck(user?.deck);
+      setDefuseCards([]);
+      setOpenedCard("");
+    } else {
+      setDeck(generateRandomDeck());
+      setDefuseCards([]);
+      setOpenedCard("");
+    }
+  },[generateRandomDeck, user?.deck, user.defuseCards, user?.openedCard]);
 
   useEffect(() => {
     //fetching user details from local storage //
@@ -38,7 +80,7 @@ const GamePlayArea = (props) => {
     if (!user.deck) return;
     //updating game when get user details //
     updateGameState();
-  }, [user]);
+  }, [user,updateGameState]);
 
   const updateUserState = (data) => {
     const { deck, defuseCards, openedCard, gameStatus } = data;
@@ -72,48 +114,10 @@ const GamePlayArea = (props) => {
     updateUserState(data);
   };
 
-  const updateGameState = () => {
-    //to update game state on every user action //
-    if (user?.deck?.length < 5 && user?.deck?.length > 0) {
-      setDeck(user?.deck);
-      setDefuseCards(user.defuseCards);
-      setOpenedCard(user?.openedCard);
-    } else if (user?.deck.length === 5) {
-      setDeck(user?.deck);
-      setDefuseCards([]);
-      setOpenedCard("");
-    } else {
-      setDeck(generateRandomDeck());
-      setDefuseCards([]);
-      setOpenedCard("");
-    }
-  };
+  
 
   // to generate random deck
-  const generateRandomDeck = () => {
-    //to generate 5 random numbers from 0 to 3
-    const c1 = Math.floor(Math.random() * 4);
-    const c2 = Math.floor(Math.random() * 4);
-    const c3 = Math.floor(Math.random() * 4);
-    const c4 = Math.floor(Math.random() * 4);
-    const c5 = Math.floor(Math.random() * 4);
-
-    //making random array by putting random numbers //
-    let randromDeck = [cards[c1], cards[c2], cards[c3], cards[c4], cards[c5]];
-
-    // filtering shuffle cards if it is more than 1
-    let shuffleCount = 0;
-    randromDeck = randromDeck.map((card) => {
-      if (card === "SHUFFLE") {
-        shuffleCount++;
-        if (shuffleCount > 1) {
-          card = "CAT";
-        }
-      }
-      return card;
-    });
-    return randromDeck;
-  };
+  
 
   //to show message (popover) after shuffle ,game over, game won
   const showMessageAndReset = (msg, btnText) => {
